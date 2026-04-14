@@ -68,6 +68,14 @@ The automated tests cover:
 
 - device creation and retrieval
 - duplicate device rejection
+- concurrent duplicate device rejection
 - signature formatting and counter updates
 - concurrent signing behavior
 - main HTTP lifecycle endpoints
+
+## AI Usage Disclosure
+
+AI tools used during this challenge:
+
+- OpenAI Codex/ChatGPT: used for code review support, and README wording.
+

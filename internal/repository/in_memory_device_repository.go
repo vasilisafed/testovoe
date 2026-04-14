@@ -7,6 +7,8 @@ import (
 	"test_task/internal/domain"
 )
 
+var ErrDeviceAlreadyExists = fmt.Errorf("device already exists")
+
 type InMemoryDeviceRepository struct {
 	mu      sync.RWMutex
 	devices map[string]*domain.Device
@@ -15,6 +17,22 @@ type InMemoryDeviceRepository struct {
 func NewInMemoryDeviceRepository() *InMemoryDeviceRepository {
 	devices := make(map[string]*domain.Device)
 	return &InMemoryDeviceRepository{sync.RWMutex{}, devices}
+}
+
+func (r *InMemoryDeviceRepository) Create(d *domain.Device) error {
+	if d == nil {
+		return fmt.Errorf("device is nil")
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, exists := r.devices[d.ID]; exists {
+		return ErrDeviceAlreadyExists
+	}
+
+	r.devices[d.ID] = d
+	return nil
 }
 
 func (r *InMemoryDeviceRepository) Save(d *domain.Device) error {

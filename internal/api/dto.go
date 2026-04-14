@@ -13,11 +13,9 @@ type SignRequest struct {
 }
 
 type DeviceResponse struct {
-	ID               string           `json:"id"`
-	Algorithm        domain.Algorithm `json:"algorithm"`
-	Label            string           `json:"label,omitempty"`
-	SignatureCounter uint64           `json:"signature_counter"`
-	LastSignature    string           `json:"last_signature,omitempty"`
+	ID        string           `json:"id"`
+	Algorithm domain.Algorithm `json:"algorithm"`
+	Label     string           `json:"label,omitempty"`
 }
 
 type SignatureResponse struct {
@@ -31,10 +29,8 @@ type ErrorResponse struct {
 
 func newDeviceResponse(device *domain.Device) DeviceResponse {
 	return DeviceResponse{
-		ID:               device.ID,
-		Algorithm:        device.Algorithm,
-		Label:            device.Label,
-		SignatureCounter: device.SignatureCounter,
-		LastSignature:    device.LastSignature,
+		ID:        device.ID,
+		Algorithm: device.Algorithm,
+		Label:     device.Label,
 	}
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"test_task/internal/domain"
@@ -48,6 +49,44 @@ func TestCreateDeviceRejectsDuplicateID(t *testing.T) {
 
 	if _, err := deviceService.CreateDevice("device-1", domain.ECC, "Two"); err != ErrDeviceAlreadyExists {
 		t.Fatalf("expected ErrDeviceAlreadyExists, got %v", err)
+	}
+}
+
+func TestCreateDeviceIsSafeForConcurrentClients(t *testing.T) {
+	deviceService, _ := newTestServices(t)
+
+	const workers = 25
+	var wg sync.WaitGroup
+	errCh := make(chan error, workers)
+	var successCount int32
+
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			_, err := deviceService.CreateDevice("device-1", domain.RSA, "Primary")
+			if err == nil {
+				atomic.AddInt32(&successCount, 1)
+				return
+			}
+			if err != ErrDeviceAlreadyExists {
+				errCh <- err
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		if err != nil {
+			t.Fatalf("concurrent CreateDevice() error = %v", err)
+		}
+	}
+
+	if successCount != 1 {
+		t.Fatalf("expected exactly one successful creation, got %d", successCount)
 	}
 }
 

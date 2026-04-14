@@ -26,9 +26,6 @@ func (s *DeviceService) CreateDevice(id string, algo domain.Algorithm, label str
 	if id == "" {
 		return nil, fmt.Errorf("device id is required")
 	}
-	if _, err := s.repo.GetByID(id); err == nil {
-		return nil, ErrDeviceAlreadyExists
-	}
 
 	device := &domain.Device{
 		ID:        id,
@@ -55,7 +52,10 @@ func (s *DeviceService) CreateDevice(id string, algo domain.Algorithm, label str
 		return nil, fmt.Errorf("unsupported algorithm %q", algo)
 	}
 
-	if err := s.repo.Save(device); err != nil {
+	if err := s.repo.Create(device); err != nil {
+		if errors.Is(err, repository.ErrDeviceAlreadyExists) {
+			return nil, ErrDeviceAlreadyExists
+		}
 		return nil, err
 	}
 
